@@ -1,0 +1,165 @@
+#!/bin/bash
+
+# arguments:
+#   token: registration token
+#   name:  the name of the executor
+
+# This script is a Terraform template file to be processed by
+# templatefile() function to replace its template parameters
+# "token" and "name" with values.
+#
+# This script is intended for Amazon Linux and x86_64 architecture.
+# Amazon Linux AMIs come with some preinstalled AWS tools such as
+# AWS CLI.  Assuming Amazon Linux, the commands to install AWS CLI
+# are commented out in this script file.
+
+# This script registers a gitlab docker executor.  A docker executor is not
+# necessary to run a gitlab docker project pipeline.  A docker executor just
+# provides a different (a docker) environment to run any gitlab pipeline.  A
+# pipeline can be run in a shell or docker environment as long as all needed
+# tools are installed in the environment.  However, if you let a docker
+# executor to run a docker project pipeline, then you are running
+# docker-in-docker.  Please, see
+#   https://cm-gitlab.stanford.edu/help/ci/docker/using_docker_build.md
+
+
+#---------- for yum based installations ----------#
+
+sudo yum update -y
+
+
+#---------- download and install gitlab runner binary ----------#
+
+# To register a gitlab executor, we first need to install and start
+# gitlab-runner as service.  To find the installation instructions
+# for MCP cloud, start from
+#   https://caas.gsfc.nasa.gov/display/GSD1/Using+Runners+in+GitLab+Ultimate
+# MCP only permits Group Runners.
+#
+# The person installing Group Runners must have Owner role for the group
+# for which he/she is installing the runner(s).  To see whether or not
+# you have Owner role (starting from top menu bar) go to
+#   Main menu  >  Groups  >  Your groups  >  Unity
+# then (starting from left side-bar) go to
+#   Group information  >  Members
+# There, you can check your "Max role", which should be "owner".
+#
+# To get the service install/start instructions first (starting from top
+# menu bar) go to
+#   Main menu  >  Groups  >  Your groups  >  Unity
+# second (starting from left side-bar) go to
+#   CI/CD  >  Runners
+# then (at upper-right corner) click on the pull-down menu
+#   "Register a group runner"
+# The pull-down menu has a few options. The one that gives you the gitlab-
+# runner service installation/start instructions is the option
+#   "Show runner installation and registration instructions"
+# The commands in this script file are for Linux/386 system.  The pull-down
+# menu also provides you with gitlab executor registration token, which is
+# needed for the registration process.
+#
+# More related instructions can be found at
+#  https://docs.gitlab.com/ee/ci/runners/runners_scope.html#group-runners
+
+# Download the binary for your system
+#
+sudo curl -L --output /usr/local/bin/gitlab-runner https://gitlab-runner-downloads.s3.amazonaws.com/latest/binaries/gitlab-runner-linux-386
+
+# Give it permission to execute
+#
+sudo chmod +x /usr/local/bin/gitlab-runner
+
+# Create a GitLab Runner user
+#
+sudo useradd --comment 'GitLab Runner' --create-home gitlab-runner --shell /bin/bash
+
+# Install and run as a service
+#
+sudo /usr/local/bin/gitlab-runner install --user=gitlab-runner --working-directory=/home/gitlab-runner
+sudo /usr/local/bin/gitlab-runner start
+
+
+#---------- register runner ----------#
+
+# In the above comments, it was explained how to obtain registration token,
+# which is needed for this step.
+#
+# There are documented cases of "register" command failing.  Some have gotten
+# around their problems by rearranging the command arguments, for example, by
+# making --docker-image option to immediately following the --executor option.
+# Others have mitigated their problem by converting some of the command options
+# of
+#   --option <value>
+# form to
+#   --option=<value>
+# form.  This may be OS dependent.  For more info, go to
+#   https://gitlab.com/gitlab-org/gitlab-runner/-/issues/2862
+#
+# The docker image given in the "register" command becomes the default docker
+# image for the docker executor.  However, it can be overridden by the
+# optional docker image in a gitlab project pipeline.
+#
+sudo /usr/local/bin/gitlab-runner register \
+     --non-interactive \
+     --name ${name} \
+     --url "https://gitlab.mcp.nasa.gov/" \
+     --registration-token ${token} \
+     --executor "docker" \
+     --docker-image alpine:latest \
+     --tag-list "docker,unity" 
+
+
+#---------- install git ----------#
+
+sudo yum install -y git
+
+
+#---------- install docker ----------#
+
+# Here, docker is primarily installed because gitlab-runner will need it to
+# run the docker executor when needed.
+
+# This may only work with Amazon Linux based AMIs.
+#
+sudo amazon-linux-extras install docker
+sudo service docker start
+sudo usermod -a -G docker ec2-user
+
+# Add gitlab-runner user to docker group.
+#
+sudo usermod -a -G docker gitlab-runner
+
+
+#---------- install aws cli ----------#
+
+#cd
+#curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+#unzip awscliv2.zip
+#sudo ./aws/install
+
+
+#---------- aws instance cleanup ----------#
+
+# Ideally, one should be able to run some cleanup commands before terminating
+# the resource instance (EC2 for now) in which the gitlab runner is running.
+# The only option, that I am aware of, requires SSH connection to the resource
+# instance which is not permitted by MCP for security reasons.  Currently,
+# there are to manual ways to do the cleanup:
+#
+#   1) Enter the commented out commands below manually at the terminal of the
+#      resource instance to be terminated, where in this case ${name} is
+#      replaced with "unity-ads-docker".
+#
+#   2) Simply terminate the resource instance, and later manually delete
+#      gitlab runners with "offline" status.  To delete "offline" runners,
+#      first at the gitlab web site (starting from top menu bar) go to
+#        Main menu  >  Groups  >  Your groups  >  Unity
+#      second (starting from left side-bar) go to
+#        CI/CD  >  Runners
+#      where you will see all registered runners, and you can manually delete
+#      them.
+
+#sudo /usr/local/bin/gitlab-runner unregister --name ${name}
+#sudo /usr/local/bin/gitlab-runner stop
+#sudo /usr/local/bin/gitlab-runner status
+#sudo service docker stop
