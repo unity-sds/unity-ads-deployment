@@ -64,7 +64,9 @@ For each entry in the list given in gl_executor_ids.tf file, the software
    * downloads and installs gitlab runner binary
    * registers a gitlab executor
    * downloads and installs all needed tools and libraries needed for the executor to execute pipeline jobs
+
 The registered executors will appear at the Unity group CI/CD.  To see a list of registered executors, first (starting from top menu bar) go to
-    Main menu  >  Groups  >  Your groups  >  Unity
+   * Main menu  >  Groups  >  Your groups  >  Unity
+
 second (starting from left side-bar) go to
-    CI/CD  >  Runners
+   * CI/CD  >  Runners
