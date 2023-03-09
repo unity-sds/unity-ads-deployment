@@ -66,11 +66,28 @@ For each entry in the list given in  _gl_executor_ids.tf_  file, the software
    * downloads and installs all needed tools and libraries needed for the executor to execute pipeline jobs assigned to it 
 
 The registered executors will appear at the Unity group CI/CD.  To see a list of registered executors,
-1. starting from top menu bar, go to
+1. Log in to MCP GitLab
+2. starting from top menu bar, go to
    * Main menu  >  Groups  >  Your groups  >  Unity
-2. starting from left side-bar, go to
+3. starting from left side-bar, go to
    * CI/CD  >  Runners
 
 Each gitlab executor may have a set of one or more tags.  GitLab will assign a pipeline job with tags only to an executor with the same tags for execution.  An executor tags (if any) can be seen at the location mentioned above, where you can see a list of registered executors.
 
 Currently the software, without any modification, will only register one gitlab shell executor with _unity_ and _shell_ tags.  However, the software is developed enough to register a docker executor as well by simplly adding _"docker"_ to the list in _gl_executor_ids.tf_ file.
+
+
+### Registration Token
+
+Gitlab executor registration process requires a registration token.  This software defines the variable
+       * _gl_runner_registration_token_
+with a default value set to the current registration token.  To see the token at MCP GitLab
+1. Log in to MCP GitLab
+2. starting from top menu bar, go to
+   * Main menu  >  Groups  >  Your groups  >  Unity
+3. starting from left side-bar, go to
+   * CI/CD  >  Runners
+4. on the right side location above the area where registered executors are listed, go to
+   * Register a group runner  >  Registration token
+5. click on the eye icon to see the registration token
+It is important to know how to find the registration token just in case it is reset.
