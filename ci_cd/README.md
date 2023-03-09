@@ -72,3 +72,5 @@ The registered executors will appear at the Unity group CI/CD.  To see a list of
    * CI/CD  >  Runners
 
 Each gitlab executor may have a set of one or more tags.  GitLab will assign a pipeline job with tags only to an executor with the same tags for execution.  An executor tags (if any) can be seen at the location mentioned above, where you can see a list of registered executors.
+
+Currently the software, without any modification, will only register one gitlab shell executor with _unity_ and _shell_ tags.  However, the software is developed enough to register a docker executor as well by simplly adding _"docker"_ to the list in _gl_executor_ids.tf_ file.
