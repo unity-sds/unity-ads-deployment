@@ -50,17 +50,17 @@ and choose “Project Owner” for the “Gitlab Role”.
 
 This terraform software deploys gitlab runners in MCP cloud environment and registers them at MCP GitLab.  It creates two types of dedicated AWS resources:
 
-1. A security group for communication with EC2 instances:  Security group name = GitLab Runner Security Group
-2. EC2 instances for gitlab runners (one instance per runner):  name = unity-ads-gl-runner-*
+1. A security group for communication with EC2 instances (Security group name = GitLab Runner Security Group)
+2. EC2 instances for gitlab runners (one instance per runner) (name = unity-ads-gl-runner-*)
 
 Each runner has its own dedicated EC2 instance.
 
 
-# Software Description
+## Software Description
 
-For each entry in the list given in gl_executor_ids.tf file, the software
+For each entry in the list given in  gl_executor_ids.tf  file, the software
 1. creates an EC2 instance
-2. runs the file  install_group_runner_x86_64_<list entry>.tftpl  to prepare the EC2 instance environment:
+2. runs the file  **install_group_runner_x86_64_<list entry>.tftpl**  to prepare the EC2 instance environment:
    * downloads and installs gitlab runner binary
    * registers a gitlab executor
    * downloads and installs all needed tools and libraries needed for the executor to execute pipeline jobs
