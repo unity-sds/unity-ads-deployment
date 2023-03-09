@@ -56,7 +56,7 @@ This terraform software deploys gitlab runners in MCP cloud environment and regi
 Each runner has its own dedicated EC2 instance.
 
 
-## Software Description
+## A Brief Software Description
 
 For each entry in the list given in  _gl_executor_ids.tf_  file, the software
 1. creates an EC2 instance
@@ -70,3 +70,5 @@ The registered executors will appear at the Unity group CI/CD.  To see a list of
    * Main menu  >  Groups  >  Your groups  >  Unity
 2. starting from left side-bar, go to
    * CI/CD  >  Runners
+
+Each gitlab executor may have a set of one or more tags.  GitLab will assign a pipeline job with tags only to an executor with the same tags for execution.  An executor tags (if any) can be seen at the location mentioned above, where you can see a list of registered executors.
