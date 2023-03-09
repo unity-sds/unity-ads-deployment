@@ -80,7 +80,9 @@ Currently the software, without any modification, will only register one gitlab 
 ### Registration Token
 
 Gitlab executor registration process requires a registration token.  This software defines the variable
-       * _gl_runner_registration_token_
+
+* _gl_runner_registration_token_
+
 with a default value set to the current registration token.  To see the token at MCP GitLab
 1. Log in to MCP GitLab
 2. starting from top menu bar, go to
