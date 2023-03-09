@@ -89,7 +89,7 @@ with a default value set to the current registration token.  To see the token at
    * Main menu  >  Groups  >  Your groups  >  Unity
 3. starting from left side-bar, go to
    * CI/CD  >  Runners
-4. on the right side location above the area where registered executors are listed, go to
+4. on the right side of the location above the area where registered executors are listed, go to
    * Register a group runner  >  Registration token
 5. click on the eye icon to see the registration token
 It is important to know how to find the registration token just in case it is reset.
