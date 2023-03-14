@@ -90,7 +90,7 @@ Gitlab executor registration process requires a registration token.  This softwa
 
 * _gl_runner_registration_token_
 
-with a default value set to the current registration token.  To see the token at MCP GitLab
+for entering the current registration token.  To see the token at MCP GitLab
 1. Log in to MCP GitLab
 2. starting from top menu bar, go to
    * Main menu  >  Groups  >  Your groups  >  Unity
@@ -100,4 +100,4 @@ with a default value set to the current registration token.  To see the token at
    * Register a group runner  >  Registration token
 5. click on the eye icon to see the registration token
 
-It is important to know how to find the registration token just in case it is reset.
+The registration token can be reset at this same location.
