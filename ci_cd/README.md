@@ -72,10 +72,17 @@ The registered executors will appear at the Unity group CI/CD.  To see a list of
 3. starting from left side-bar, go to
    * CI/CD  >  Runners
 
-Each gitlab executor may have a set of one or more tags.  GitLab will assign a pipeline job with tags only to an executor with the same tags for execution.  An executor tags (if any) can be seen at the location mentioned above, where you can see a list of registered executors.
+Each gitlab executor may have a set of one or more tags.  GitLab will assign a pipeline job with tags only to an executor with the same tags for execution.  Executor tags (if any) can be seen at the location mentioned above, where you can see a list of registered executors.
 
 Currently the software, without any modification, will only register one gitlab shell executor with _unity_ and _shell_ tags.  However, the software is developed enough to register a docker executor as well by simplly adding _"docker"_ to the list in _gl_executor_ids.tf_ file.
 
+A *.tftpl* filename, like the one mentioned above, is internally generated based on a templatized filename of the form
+
+* install_group_runner_\<architecture\>_\<list entry\>.tftpl
+
+The second parameter *\<list entry\>* was already discussed above.  The first parameter *\<architecture\>* is replaced with the selected architecture for the EC2 instance.  The architecture argument to the terraform command can be provided through *gl_runner_architecture* terraform variable, which has a default value of *"x86_64"*.
+
+The only variable of this terraform script that does not have a default value is *gl_runner_registration_token*.  Therefore, an argument for *gl_runner_registration_token* must be entered at the terraform command line or when prompted.
 
 ### Registration Token
 

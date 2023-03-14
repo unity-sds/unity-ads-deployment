@@ -33,6 +33,7 @@ provider "aws" {
 
 
 
+
 # VARIABLES
 
 
@@ -41,7 +42,7 @@ provider "aws" {
 variable "gl_runner_machine_name" {
   description = "Name of the machine to be used for GitLab runner"
   type        = string
-  default     = "MCP Amazon Linux 2 2022*"
+  default     = "MCP Amazon Linux 2 20*"
 }
 
 variable "gl_runner_instance_type" {
@@ -74,7 +75,6 @@ variable "gl_runner_base_name" {
 variable "gl_runner_registration_token" {
   description = "GitLab registration token for the runner"
   type        = string
-  default     = "GR134894133syWaUvZgtzypprtyz7"
 }
 
 
@@ -136,13 +136,50 @@ data "aws_subnets" "unity_public_subnet_nat" {
 }
 
 
-# Lookup the correct AMI id to use.  Arrange them in
-# descending order so that the latest version comes
-# first.
+# Any of the following two blocks can be used as data source
+# for aws ami id.  The first block (commented out) generates
+# a list of IDs, and the argument "owners" is required.  The
+# second block must narrow down to exactly one ID; otherwise,
+# terraform fails.
+
+# Lookup the correct AMI id to use.  Arrange them in descending
+# order so that the latest version comes first.  Wherever needed,
+# use
+#    data.aws_ami_ids.machine_ami.ids[0]
+# to access the latest version of the desired AMI id.
 #
-data "aws_ami_ids" "machine_ami" {
-  sort_ascending = false
-  owners         = ["794625662971"]
+#data "aws_ami_ids" "machine_ami" {
+#  sort_ascending = false
+#  owners         = ["<owner id or alias if any alias>"]
+#  filter {
+#    name   = "name"
+#    values = [var.gl_runner_machine_name]
+#  }
+#  filter {
+#    name   = "root-device-type"
+#    values = ["ebs"]
+#  }
+#  filter {
+#    name   = "virtualization-type"
+#    values = ["hvm"]
+#  }
+#  filter {
+#    name   = "architecture"
+#    values = ["${var.gl_runner_architecture}"]
+#  }
+#}
+
+# Another way of obtaining the desired AMI id.  Lookup the correct
+# AMI id to use.  Set the optional argument "most_recent" to insure
+# that we narrow than to no more than one AMI id and the latest
+# version.  For aws_ami, the argument "owners" is optional.
+# Wherever needed, use
+#    data.aws_ami.machine_ami.id
+# to access the latest version of the desired AMI id.
+#
+data "aws_ami" "machine_ami" {
+  executable_users = ["self"]
+  most_recent      = true
   filter {
     name   = "name"
     values = [var.gl_runner_machine_name]
@@ -199,15 +236,15 @@ resource "aws_security_group" "gl_runner_security_group" {
 #
 resource "aws_instance" "gl_runner_instance" {
   for_each               = toset(local.gl_exec_ids)
-  ami                    = data.aws_ami_ids.machine_ami.ids[0]
+  ami                    = data.aws_ami.machine_ami.id
   instance_type          = var.gl_runner_instance_type
   subnet_id              = data.aws_subnets.unity_private_subnets.ids[0]
   vpc_security_group_ids = [aws_security_group.gl_runner_security_group.id]
 
   # Download and install gitlab runner
   #
-  user_data = templatefile(  "./install_group_runner_${var.gl_runner_architecture}_${each.key}.tftpl",
-                             { token = "${var.gl_runner_registration_token}", name = "${var.gl_runner_base_name}-${each.key}" }  )
+  user_data = templatefile("./install_group_runner_${var.gl_runner_architecture}_${each.key}.tftpl",
+  { token = "${var.gl_runner_registration_token}", name = "${var.gl_runner_base_name}-${each.key}" })
 
   tags = {
     Name = "${var.gl_runner_instance_base_name}-${each.key}"
@@ -224,31 +261,42 @@ output "unity_vpc_id" {
   description = "Unity VPC id"
   value       = data.aws_vpc.unity_vpc.id
 }
+
 output "unity_private_subnet_ids" {
   description = "Unity private subnet ids"
   value       = data.aws_subnets.unity_private_subnets.ids
 }
+
 output "unity_public_subnet_ids" {
   description = "Unity public subnet ids"
   value       = data.aws_subnets.unity_public_subnets.ids
 }
+
 output "unity_public_subnet_id" {
   description = "Id of Unity public subnet with NAT"
   value       = data.aws_subnets.unity_public_subnet_nat.ids
 }
+
+#output "mcp_machine_ami_ids" {
+#  description = "Desired machine AMIs"
+#  value       = data.aws_ami_ids.machine_ami.ids
+#}
+
 output "mcp_machine_ami_id" {
-  description = "Desired machine AMIs"
-  value       = data.aws_ami_ids.machine_ami.ids
+  description = "Desired machine AMI"
+  value       = data.aws_ami.machine_ami.id
 }
+
 output "gl_runner_instance_id" {
   description = "The ID for the newly created jenkins EC2 instance"
-  value       = tomap({
+  value = tomap({
     for k, inst in aws_instance.gl_runner_instance : k => inst.id
   })
 }
+
 output "gl_runner_public_ip" {
   description = "The ip address for the newly created GitLab runner EC2 instance"
-  value       = tomap({
+  value = tomap({
     for k, inst in aws_instance.gl_runner_instance : k => inst.public_ip
   })
 }
