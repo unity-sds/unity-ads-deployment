@@ -1,13 +1,13 @@
 import json
 import os
 import subprocess
+import jwt
 
 import boto3
 from botocore.exceptions import ClientError
 
 
 def get_secret():
-
     secret_name = "MCP-GLU-Clone"
     region_name = "us-west-2"
 
@@ -31,6 +31,20 @@ def get_secret():
     mcp_glu_access_token = (json.loads(get_secret_value_response['SecretString']))['MCP_ACCESS_TOKEN_ES']
     mcp_glu_trigger_token = (json.loads(get_secret_value_response['SecretString']))['MCP_GLU_CLONE_PIPELINE_TT']
     return mcp_glu_id, mcp_glu_access_token, mcp_glu_trigger_token
+
+
+def get_end_user_info(event):
+    cgroup = None
+    cuser = None
+    try:
+        if (event['headers']) and (event['headers']['Authorization']) and (event['headers']['Authorization'] != None):
+            cog_auth_token = event['headers']['Authorization'].split(' ')[1]
+            jwt_dict = jwt.decode(cog_auth_token, options={"verify_signature": False})
+            cgroup = jwt_dict['cognito:groups']
+            cuser = jwt_dict['username']
+    except KeyError:
+        print('No cognito authorization token')
+    return cuser, cgroup
 
 
 def lambda_handler(event, context):
@@ -89,16 +103,35 @@ def lambda_handler(event, context):
                 clone_url = body[my_key]
     except KeyError:
         print('No clone_url')
+        
+    cuser, cgroups = get_end_user_info(event)
     
-    curl_cmd_p = 'curl -X POST --fail ' \
-       '-F token={0} ' \
-       '-F "ref=main" ' \
-       '-F "variables[MCP_GLU_ID_ES]={1}" ' \
-       '-F "variables[MCP_ACCESS_TOKEN_ES]={2}" ' \
-       '-F "variables[PROJ_TO_CLONE]={3}" ' \
-       'https://gitlab.mcp.nasa.gov/api/v4/projects/341/trigger/pipeline'
-    curl_cmd = curl_cmd_p.format(ttoken, id, token, clone_url)
+    if cuser == None:
+        curl_cmd_p = 'curl -X POST --fail ' \
+            '-F token={0} ' \
+            '-F "ref=main" ' \
+            '-F "variables[MCP_GLU_ID_ES]={1}" ' \
+            '-F "variables[MCP_ACCESS_TOKEN_ES]={2}" ' \
+            '-F "variables[PROJ_TO_CLONE]={3}" ' \
+            'https://gitlab.mcp.nasa.gov/api/v4/projects/341/trigger/pipeline'
+        curl_cmd = curl_cmd_p.format(ttoken, id, token, clone_url)
+    else:
+        curl_cmd_p = 'curl -X POST --fail ' \
+            '-F token={0} ' \
+            '-F "ref=main" ' \
+            '-F "variables[MCP_GLU_ID_ES]={1}" ' \
+            '-F "variables[MCP_ACCESS_TOKEN_ES]={2}" ' \
+            '-F "variables[PROJ_TO_CLONE]={3}" ' \
+            '-F "variables[SGROUP]={4}" ' \
+            'https://gitlab.mcp.nasa.gov/api/v4/projects/341/trigger/pipeline'
+        curl_cmd = curl_cmd_p.format(ttoken, id, token, clone_url, cuser)
+
     cprocess = subprocess.run(curl_cmd, shell=True, capture_output=True, text=True)
+    print('========v unity-mcp-clone trigger stdout')
+    print(cprocess.stdout)
+    print('========v unity-mcp-clone trigger stderr')
+    print(cprocess.stderr)
+    print('========')
 
     response_body = {}
     response_body['clone_url'] = clone_url
