@@ -3,6 +3,8 @@
 # arguments:
 #   token: registration token
 #   name:  the name of the executor
+#   app_gen_v:  the version (tag) of https://github.com/unity-sds/app-pack-generator to be installed
+#   uapp_gen_v:  the version (tag) of https://github.com/unity-sds/unity-app-generator to be installed
 
 # This script is a Terraform template file to be processed by
 # templatefile() function to replace its template parameters
@@ -185,9 +187,9 @@ sudo usermod -a -G docker gitlab-runner
 # there must be no sudo before the "pip3 install ..." command itself.
 
 cd /home/gitlab-runner
-su gitlab-runner -c "git clone https://github.com/unity-sds/app-pack-generator.git"
+su gitlab-runner -c "git clone --depth 1 --branch ${app_gen_v} https://github.com/unity-sds/app-pack-generator.git"
 pip3 install app-pack-generator/
-su gitlab-runner -c "git clone https://github.com/unity-sds/unity-app-generator.git"
+su gitlab-runner -c "git clone --depth 1 --branch ${uapp_gen_v} https://github.com/unity-sds/unity-app-generator.git"
 pip3 install unity-app-generator/
 
 

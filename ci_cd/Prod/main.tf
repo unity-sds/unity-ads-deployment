@@ -75,6 +75,22 @@ locals {
 
 # VARIABLES
 
+# Some software versions installed in EC2 instance
+
+variable "app_pack_gen_version" {
+  description = "The version (tag) of app-pack-generator to install"
+  type        = string
+  default     = "0.4.0"
+}
+
+variable "unity_app_gen_version" {
+  description = "The version (tag) of unity-app-generator to install"
+  type        = string
+  default     = "0.3.0"
+}
+
+
+
 # System info: os, hardware
 
 variable "gl_runner_machine_name" {
@@ -334,7 +350,10 @@ resource "aws_instance" "gl_runner_instance" {
   # Download and install gitlab runner
   #
   user_data = templatefile("../install_group_runner_${var.gl_runner_architecture}_${each.key}.tftpl",
-  { token = "${var.gl_runner_registration_token}", name = lower("${var.gl_runner_base_name}-${local.unity_venue}-${each.key}") })
+    { token      = var.gl_runner_registration_token,
+      name       = lower("${var.gl_runner_base_name}-${local.unity_venue}-${each.key}"),
+      app_gen_v  = var.app_pack_gen_version,
+      uapp_gen_v = var.unity_app_gen_version })
 
   tags = {
     Name = "${var.gl_runner_instance_base_name}-${each.key}"
