@@ -63,7 +63,7 @@ resource "aws_ssm_parameter" "serviceproxy_config" {
       ProxyPreserveHost on
       Header always set Strict-Transport-Security "max-age=63072000"
       # proxy to JupyterHub
-      ProxyPass        "${module.frontend.internal_base_url}/${local.jupyter_base_path}/" upgrade=websocket
+      ProxyPass        "${module.frontend.internal_base_url}/${local.jupyter_base_path}/" upgrade=websocket retry=5 disablereuse=On
       ProxyPassReverse "${module.frontend.internal_base_url}/${local.jupyter_base_path}/"
       RequestHeader     set "X-Forwarded-Proto" expr=%%{REQUEST_SCHEME}
     </Location>
