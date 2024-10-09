@@ -19,42 +19,72 @@
 
 <!-- ☝️ Screenshot of your software (if applicable) via ![](https://uri-to-your-screenshot) ☝️ -->
 
-This software encapsulates the deployment of the Unity Algorithm Development Services (U-ADS) infrastructure into an MCP AWS enclave. It consists of Terraform scripts for GitLab CI/CD service.
+The Unity Algorithm Development Services (U-ADS) Auto Clone/Build (ACB) infrastructure brings together several tools and resources to enable cloning and building a git project to the Unity specifications. This software encapsulates and automates the deployment of most of the U-ADS infrastructure into an MCP AWS enclave. It consists of Terraform and Bash scripts for GitLab CI/CD service, and it can deploy U-ADS ACB into any of the three Unity Dev, Test, and Prod accounts (venues).
 
 <!-- example links>
 [Website](INSERT WEBSITE LINK HERE) | [Docs/Wiki](INSERT DOCS/WIKI SITE LINK HERE) | [Discussion Board](INSERT DISCUSSION BOARD LINK HERE) | [Issue Tracker](INSERT ISSUE TRACKER LINK HERE)
 -->
 
-## Features
+## Deployed Resources
 
-Deploys Unity ADS services:
+The resources deployed by this software are mostly AWS resources, and they are
 
-* GitLab CI/CD
+* EC2 Instance
+* Security Group
+* Lambda function and layer
+* CloudWatch log group
+* Secret at AWS Secrets Manager
+* Lambda execution role and its policies 
+* Restful API method for calling the Lambda function
+* Unity-App-Build-Trigger https://github.com/unity-sds/unity-app-build-trigger (not an AWS resource, but installed by this package in the EC2 Instance)
+* gitlab runners (not an AWS resource, but installed and run by this package in the EC2 Instance)
 
+## Dependencies
 
-## Gitlab CI/CD
+The successful deployment of the above mentioned resources depends on the existance of the following resources, which are mostly AWS resources:
 
-This Terraform software deploys gitlab CI/CD service into MCP AWS, which is needed to execute a gitlab project CI/CD pipeline.  A gitlab system has two major components:
+* VPC: Unity-\<_Venue_\>-VPC
+* Private Subnet(s): Unity-\<_Venue_\>-Priv-Subnet\<_dd_\>
+* MCP Provided IAM Boundary Policy: mcp-tenantOperator-AMI-APIG
+* AWS Provided IAM Policy: AWSLambdaBasicExecutionRole
+* AWS Provided IAM Policy: AWSXRayDaemonWriteAccess
+* API Gateway (rest API): Unity API Gateway
+* API Gateway Authorizer, attached to Unity API Gateway
+* A gitlab instance, which currently is MCP GitLan Ultimate (not an AWS resource)
 
-1. gitlab instance (not deployed by this software)
-2. gitlab runners (deployed by this software)
+where
 
-### GitLab Instance
+* \<_Venue_\> is replaced with Dev, Test, or Prod, depending on which Unity account is being used
+* \<_dd_\> is replaced with two decimal digits like 01, 02, or 03.
 
-This software does not deploy any gitlab instance.  Unity project uses MCP (Mission Cloud Platform) GitLab provided by Goddard for its git repository management.  The MCP GitLab URL is https://gitlab.mcp.nasa.gov.  To request an MCP GitLab lisence, follow the instructions at
+## GitLab 
+
+### Instance
+
+This software does not deploy any gitlab instance.  Currently, Unity project uses MCP (Mission Cloud Platform) GitLab provided by Goddard for its git repository management. The MCP GitLab URL is https://gitlab.mcp.nasa.gov.  To request an MCP GitLab lisence, follow the instructions at
 	https://caas.gsfc.nasa.gov/display/GSD1/Requesting+Access+to+GitLab+Ultimate
 and choose “Project Owner” for the “Gitlab Role”.
 
+### Runners
 
-### Gitlab runners
+As a part of U-ADS ACB deployment, this terraform/bash software deploys gitlab runner in U-ADS ACB EC2 Instance and registers it at MCP GitLab. The registeration requires MCP GitLab registeration token, which can be obtained from https://gitlab.mcp.nasa.gov. Terraform prompts for entering the token during '_terraform apply_'.
 
-This terraform software deploys gitlab runners in MCP cloud environment and registers them at MCP GitLab.  It creates two types of dedicated AWS resources:
+### Registration Token
 
-1. A security group for communication with EC2 instances (Security group name = GitLab Runner Security Group)
-2. EC2 instances for gitlab runners (one instance per runner) (name = unity-ads-gl-runner-*)
+Gitlab executor registration process requires a registration token.  This software defines the variable
 
-Each runner has its own dedicated EC2 instance.
+* _gl_runner_registration_token_
 
+for entering the current registration token.  To see the token at MCP GitLab
+1. Log in to MCP GitLab
+2. Starting from the left side-bar, go to
+   * Left side-bar  >  Groups  >  Unity
+3. After accessing Unity Group and again starting from left side-bar, go to
+   * Build  >  Runners
+4. On the right side of the location above the area where registered executors are listed, there is a _New group runner_ button, and to the right of the button there is a small menue with three vertical dots '.'. Click on the dots, and you will see the hidden regiteration token.
+5. click on the eye icon to see the registration token
+
+The registration token can be reset at this same location.
 
 ## A Brief Software Description
 
@@ -83,21 +113,3 @@ A *.tftpl* filename, like the one mentioned above, is internally generated based
 The second parameter *\<list entry\>* was already discussed above.  The first parameter *\<architecture\>* is replaced with the selected architecture for the EC2 instance.  The architecture argument to the terraform command can be provided through *gl_runner_architecture* terraform variable, which has a default value of *"x86_64"*.
 
 The only variable of this terraform script that does not have a default value is *gl_runner_registration_token*.  Therefore, an argument for *gl_runner_registration_token* must be entered at the terraform command line or when prompted.
-
-### Registration Token
-
-Gitlab executor registration process requires a registration token.  This software defines the variable
-
-* _gl_runner_registration_token_
-
-for entering the current registration token.  To see the token at MCP GitLab
-1. Log in to MCP GitLab
-2. starting from top menu bar, go to
-   * Main menu  >  Groups  >  Your groups  >  Unity
-3. starting from left side-bar, go to
-   * CI/CD  >  Runners
-4. on the right side of the location above the area where registered executors are listed, go to
-   * Register a group runner  >  Registration token
-5. click on the eye icon to see the registration token
-
-The registration token can be reset at this same location.
