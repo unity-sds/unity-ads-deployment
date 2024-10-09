@@ -21,6 +21,8 @@
 
 The Unity Algorithm Development Services (U-ADS) Auto Clone/Build (ACB) infrastructure brings together several tools and resources to enable cloning and building a git project to the Unity specifications. This software encapsulates and automates the deployment of most of the U-ADS infrastructure into an MCP AWS enclave. It consists of Terraform and Bash scripts for GitLab CI/CD service, and it can deploy U-ADS ACB into any of the three Unity Dev, Test, and Prod accounts (venues).
 
+This README file briefly explaines what resources the deployment creates, and what preexisting reosurces it depends on. It covers just enough information to help with a successful deployment of the U-ADS ACB into the cloud. For details on the design of the ACB system, testing the system, and troubleshooting the reader is encouraged to read _MCP Cloning 20240722_ Word document at [Unity Project > Work Areas > Algorithm Development Services > Documentation](https://drive.google.com/drive/folders/15kWfQw0R9i-OdJjYNGmGa3iAn8dQXv4K?ths=true). This link is a folder where the docuemnt is located and not a link to the document itself.
+
 <!-- example links>
 [Website](INSERT WEBSITE LINK HERE) | [Docs/Wiki](INSERT DOCS/WIKI SITE LINK HERE) | [Discussion Board](INSERT DISCUSSION BOARD LINK HERE) | [Issue Tracker](INSERT ISSUE TRACKER LINK HERE)
 -->
@@ -50,7 +52,7 @@ The successful deployment of the above mentioned resources depends on the exista
 * AWS Provided IAM Policy: AWSXRayDaemonWriteAccess
 * API Gateway (rest API): Unity API Gateway
 * API Gateway Authorizer, attached to Unity API Gateway
-* A gitlab instance, which currently is MCP GitLan Ultimate (not an AWS resource)
+* A gitlab instance, which currently is MCP GitLab Ultimate (not an AWS resource)
 
 where
 
@@ -86,7 +88,19 @@ for entering the current registration token.  To see the token at MCP GitLab
 
 The registration token can be reset at this same location.
 
-## A Brief Software Description
+## U-ADS ACB Deployment in Brief
+
+The deployment of the U-ADS ACB is explained here briefly.
+
+### Requirements
+
+### Downloading Deployment Software
+
+### Deploying U-ADS ACB
+
+### What to Expect
+
+
 
 For each entry in the list given in  _gl_executor_ids.tf_  file, the software
 1. creates an EC2 instance
