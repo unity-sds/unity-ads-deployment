@@ -47,63 +47,81 @@ def get_end_user_info(event):
     return cuser, cgroup
 
 
-def lambda_handler(event, context):
-    # TODO implement
-    id, token, ttoken = get_secret()
-    
-    # The following try/except statments enable several ways to remotely
-    # call this Lambda function. They are:
+def get_api_argument(event, my_key):
+    # The following nested try/except statments enable several ways to
+    # pass API arguments to Lambda function. They are:
     #
     #  - aws cli:
     #
     #      aws lambda invoke lambda-output --invocation-type RequestResponse \
     #        --function-name Unity-ADS--MCP-Clone --region us-west-2 \
-    #        --payload '{"clone_url" : "<repo url to clone>"}'
+    #        --payload '{"<key>" : "<value>"}'
     #
     #  - curl / query string parameter:
     #
-    #      curl -X GET 'https://1gp9st60gd.execute-api.us-west-2.amazonaws.com/dev/ads/mcp-clone/?clone_url=<repo url to clone>'
+    #      curl -X GET 'https://1gp9st60gd.execute-api.us-west-2.amazonaws.com/dev/ads/mcp-clone/?<key>=<value>'
     #
     #  - curl / header parameter:
     #
     #      curl -X GET https://1gp9st60gd.execute-api.us-west-2.amazonaws.com/dev/ads/mcp-clone \
-    #        -H 'content-type: application/json' -H 'clone_url: <repo url to clone>'
+    #        -H 'content-type: application/json' -H '<key>: <value>'
     #
     #  - curl / body:
     #
     #      curl -X GET https://1gp9st60gd.execute-api.us-west-2.amazonaws.com/dev/ads/mcp-clone \
-    #        -H 'content-type: application/json' -d '{ "clone_url": "<repo url to clone>" }'
-
-    my_key = 'clone_url'
-    clone_url = 'bad-url'
+    #        -H 'content-type: application/json' -d '{ "<key>": "<value>" }'
+    #
+    # Nested try/except does not work here.
+    #
+    ret_val = None
     try:
         if (event[my_key]) and (event[my_key] != None):
-            clone_url = event[my_key]
+            ret_val = event[my_key]
+            return ret_val
     except KeyError:
-        print('No clone_url')
+        ret_val = None
     try:
         if (event['queryStringParameters']) and (event['queryStringParameters'][my_key]) and (event['queryStringParameters'][my_key] != None):
-            clone_url = event['queryStringParameters'][my_key]
+            ret_val = event['queryStringParameters'][my_key]
+            return ret_val
     except KeyError:
-        print('No clone_url')
+        ret_val = None
     try:
         if (event['multiValueHeaders']) and (event['multiValueHeaders'][my_key]) and (event['multiValueHeaders'][my_key] != None):
-            clone_url = " and ".join(event['multiValueHeaders'][my_key])
+            ret_val = " and ".join(event['multiValueHeaders'][my_key])
+            return ret_val
     except KeyError:
-        print('No clone_url')  
+        ret_val = None
     try:
         if (event['headers']) and (event['headers'][my_key]) and (event['headers'][my_key] != None):
-            clone_url = event['headers'][my_key]
+            ret_val = event['headers'][my_key]
+            return ret_val
     except KeyError:
-        print('No clone_url')   
+        ret_val = None 
     try:
         if (event['body']) and (event['body'] != None):
             body = json.loads(event['body'])
             if (body[my_key]) and (body[my_key] != None):
-                clone_url = body[my_key]
+                ret_val = body[my_key]
+                return ret_val
     except KeyError:
-        print('No clone_url')
-        
+        ret_val = None
+
+    return ret_val
+    
+
+def lambda_handler(event, context):
+    # TODO implement
+    id, token, ttoken = get_secret()
+
+    apg_default_tag = '0.4.1'
+    uag_default_tag = '0.3.0'
+
+    apg_tag = get_api_argument(event, 'apg_tag') or apg_default_tag
+    uag_tag = get_api_argument(event, 'uag_tag') or uag_default_tag
+    clone_url = get_api_argument(event, 'clone_url')
+    unity_venue = event['requestContext']['stage'].lower()
+
     cuser, cgroups = get_end_user_info(event)
     no_subgroup = True 
     if (cuser == None) or no_subgroup:
@@ -113,8 +131,11 @@ def lambda_handler(event, context):
             '-F "variables[MCP_GLU_ID_ES]={1}" ' \
             '-F "variables[MCP_ACCESS_TOKEN_ES]={2}" ' \
             '-F "variables[PROJ_TO_CLONE]={3}" ' \
+            '-F "variables[APG_TAG]={4}" ' \
+            '-F "variables[UAG_TAG]={5}" ' \
+            '-F "variables[UNITY_VENUE]={6}" ' \
             'https://gitlab.mcp.nasa.gov/api/v4/projects/341/trigger/pipeline'
-        curl_cmd = curl_cmd_p.format(ttoken, id, token, clone_url)
+        curl_cmd = curl_cmd_p.format(ttoken, id, token, clone_url, apg_tag, uag_tag, unity_venue)
     else:
         curl_cmd_p = 'curl -X POST --fail ' \
             '-F token={0} ' \
@@ -123,10 +144,17 @@ def lambda_handler(event, context):
             '-F "variables[MCP_ACCESS_TOKEN_ES]={2}" ' \
             '-F "variables[PROJ_TO_CLONE]={3}" ' \
             '-F "variables[SGROUP]={4}" ' \
+            '-F "variables[APG_TAG]={5}" ' \
+            '-F "variables[UAG_TAG]={6}" ' \
+            '-F "variables[UNITY_VENUE]={7}" ' \
             'https://gitlab.mcp.nasa.gov/api/v4/projects/341/trigger/pipeline'
-        curl_cmd = curl_cmd_p.format(ttoken, id, token, clone_url, cuser)
+        curl_cmd = curl_cmd_p.format(ttoken, id, token, clone_url, cuser, apg_tag, uag_tag, unity_venue)
 
+    print('========v unity-mcp-clone trigger command')
+    print(curl_cmd)
+    #
     cprocess = subprocess.run(curl_cmd, shell=True, capture_output=True, text=True)
+    #
     print('========v unity-mcp-clone trigger stdout')
     print(cprocess.stdout)
     print('========v unity-mcp-clone trigger stderr')
@@ -136,6 +164,8 @@ def lambda_handler(event, context):
     response_body = {}
     response_body['clone_url'] = clone_url
     response_body['log_group_name'] = context.log_group_name
+    response_body['apg_tag'] = apg_tag
+    response_body['uag_tag'] = uag_tag
     
     response_http = {}
     response_http['statusCode'] = 200
