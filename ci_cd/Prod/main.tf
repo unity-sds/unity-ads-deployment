@@ -75,6 +75,24 @@ locals {
 
 # VARIABLES
 
+# Some software versions installed in EC2 instance: These version
+# control variables are currently ignored, but we may want to use
+# them in the future.
+
+variable "app_pack_gen_version" {
+  description = "The version (tag) of app-pack-generator to install"
+  type        = string
+  default     = "0.4.1"
+}
+
+variable "unity_app_gen_version" {
+  description = "The version (tag) of unity-app-generator to install"
+  type        = string
+  default     = "0.3.0"
+}
+
+
+
 # System info: os, hardware
 
 variable "gl_runner_machine_name" {
@@ -334,7 +352,11 @@ resource "aws_instance" "gl_runner_instance" {
   # Download and install gitlab runner
   #
   user_data = templatefile("../install_group_runner_${var.gl_runner_architecture}_${each.key}.tftpl",
-  { token = "${var.gl_runner_registration_token}", name = lower("${var.gl_runner_base_name}-${local.unity_venue}-${each.key}") })
+    { token       = var.gl_runner_registration_token,
+      name        = lower("${var.gl_runner_base_name}-${local.unity_venue}-${each.key}"),
+      app_gen_v   = var.app_pack_gen_version,
+      uapp_gen_v  = var.unity_app_gen_version,
+      unity_venue = lower(local.unity_venue) })
 
   tags = {
     Name = "${var.gl_runner_instance_base_name}-${each.key}"
@@ -348,7 +370,8 @@ resource "aws_instance" "gl_runner_instance" {
 # aws secretsmanager delete-secret --secret-id MCP-GLU-Clone --force-delete-without-recovery --region us-west-2
 #
 resource "aws_secretsmanager_secret" "mcp_glu_clone" {
-  name = "MCP-GLU-Clone"
+  name                    = "MCP-GLU-Clone"
+  recovery_window_in_days = 0
 }
 #
 resource "aws_secretsmanager_secret_version" "mcp_glu_clone" {
@@ -487,24 +510,32 @@ resource "aws_api_gateway_method_response" "response_200" {
   status_code = "200"
 }
 #
-resource "aws_api_gateway_deployment" "mcp_clone" {
-  rest_api_id = data.aws_api_gateway_rest_api.unity_rest_api.id
-  stage_name    = lower(local.unity_venue)
-
-  triggers = {
-    redeployment = sha1(jsonencode([
-      aws_api_gateway_resource.ads_acb.id,
-      aws_api_gateway_resource.mcp_clone.id,
-      aws_api_gateway_method.mcp_clone.id,
-      aws_api_gateway_integration.integration.id,
-      aws_api_gateway_method_response.response_200.id,
-    ]))
-  }
-
-  lifecycle {
-    create_before_destroy = true
-  }
-}
+# Currently, automated gateway deployment is disabled (commented out).
+# Unity API Gateway should be deployed manually at AWS console for now.
+#
+#resource "aws_api_gateway_deployment" "mcp_clone" {
+#  rest_api_id = data.aws_api_gateway_rest_api.unity_rest_api.id
+#
+#  triggers = {
+#    redeployment = sha1(jsonencode([
+#      aws_api_gateway_resource.ads_acb.id,
+#      aws_api_gateway_resource.mcp_clone.id,
+#      aws_api_gateway_method.mcp_clone.id,
+#      aws_api_gateway_integration.integration.id,
+#      aws_api_gateway_method_response.response_200.id,
+#    ]))
+#  }
+#
+#  lifecycle {
+#    create_before_destroy = true
+#  }
+#}
+#
+#resource "aws_api_gateway_stage" "venue" {
+#  deployment_id = aws_api_gateway_deployment.mcp_clone.id
+#  rest_api_id   = data.aws_api_gateway_rest_api.unity_rest_api.id
+#  stage_name    = lower(local.unity_venue)
+#}
 
 
 

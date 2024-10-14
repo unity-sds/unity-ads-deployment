@@ -3,6 +3,9 @@
 # arguments:
 #   token: registration token
 #   name:  the name of the executor
+#   app_gen_v:  the version (tag) of https://github.com/unity-sds/app-pack-generator to be installed
+#   uapp_gen_v:  the version (tag) of https://github.com/unity-sds/unity-app-generator to be installed
+#   unity_venue:  the unity account (dev, test or prod), used for tagging gitlab runner executor
 
 # This script is a Terraform template file to be processed by
 # templatefile() function to replace its template parameters
@@ -117,7 +120,7 @@ sudo /usr/local/bin/gitlab-runner register \
      --url "https://gitlab.mcp.nasa.gov/" \
      --registration-token ${token} \
      --executor "shell" \
-     --tag-list "shell,unity" 
+     --tag-list "shell,unity,${unity_venue}" 
 
 
 #---------- install git and git-lfs ----------#
@@ -143,6 +146,7 @@ sudo chmod 755 /tmp/install_miniconda.sh
 sudo bash /tmp/install_miniconda.sh -b -p /usr/local -u
 
 pip3 install notebook
+pip3 install virtualenv
 
 
 #---------- install docker ----------#
@@ -184,14 +188,14 @@ sudo usermod -a -G docker gitlab-runner
 # used before some of the preceding commands (not sure which ones), but
 # there must be no sudo before the "pip3 install ..." command itself.
 
-cd /home/gitlab-runner
-su gitlab-runner -c "git clone https://github.com/unity-sds/app-pack-generator.git"
-pip3 install app-pack-generator/
-su gitlab-runner -c "git clone https://github.com/unity-sds/unity-app-generator.git"
-pip3 install unity-app-generator/
+#cd /home/gitlab-runner
+#su gitlab-runner -c "git clone --depth 1 --branch ${app_gen_v} https://github.com/unity-sds/app-pack-generator.git"
+#pip3 install app-pack-generator/
+#su gitlab-runner -c "git clone --depth 1 --branch ${uapp_gen_v} https://github.com/unity-sds/unity-app-generator.git"
+#pip3 install unity-app-generator/
 
 
-#---------- install unity-app-generator ----------#
+#---------- install unity-app-build-trigger ----------#
 
 cd /home/gitlab-runner
 su gitlab-runner -c "git clone https://github.com/unity-sds/unity-app-build-trigger.git"
