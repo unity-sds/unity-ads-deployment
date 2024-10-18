@@ -131,13 +131,13 @@ After entering _terraform aaply_ command and a coffee break, because time is nee
 
 #### GitLab Runner
 
-The registered executors will appear at the Unity group CI/CD.  To see the registered executor
+The registered runner will appear at the Unity group CI/CD.  To see the registered runner
 1. Log in to MCP GitLab at https://gitlab.mcp.nasa.gov/
 2. From the left sidebar select _Groups_
 3. Then select _Unity_ group
 4. Again, from the left sidebar select _Build > Runners_
 
-You should be able to see a recently registerd runner with three tags _shell, unity, dev_
+You should be able to see a recently registerd runner with three tags _shell, unity, dev_.
 
 #### AWS Resources
 
@@ -150,9 +150,9 @@ Log into https://login.mcp.nasa.gov/ and access Unity _Dev_ account AWS console.
 
 #### Logging into the EC2 Instance
 
-After a successful U-ADS ACB deployment, you should be able to log into _unity-ads-gl-runner-shell_ EC2 insance. Log into https://login.mcp.nasa.gov/ and access Unity _Dev_ account AWS console. Navigate to _EC2 > Instances_, then select _unity-ads-gl-runner-shell_ and click on _Connect_ button close to the top of the page. Then select _Session Manager_ and another _Connect_ button at the lower right corner of the new page. A "terminal" appears with a shell prompt, and you are logged into the EC2 instance. At this point, you should be able to enter the following command and switch to _gitlab-runner_ account:
+After a successful U-ADS ACB deployment, you should be able to log into _unity-ads-gl-runner-shell_ EC2 insance. Log into https://login.mcp.nasa.gov/ and access Unity _Dev_ account AWS console. Navigate to _EC2 > Instances_, then select _unity-ads-gl-runner-shell_ and click on _Connect_ button close to the top of the page, which will take you to a new page. Then select _Session Manager_ and another _Connect_ button at the lower right corner of the new page. A "terminal" appears with a shell prompt, and you are logged into the EC2 instance. At this point, you should be able to enter the following command and switch to _gitlab-runner_ account:
    * _sudo su - gitlab-runner_
 
-At the home directory of _gitlab-runner_ account, you should the git project _unity-app-build-trigger_ installed.
+At the home directory of _gitlab-runner_ account, you should find the git project _unity-app-build-trigger_ installed.
 
 
