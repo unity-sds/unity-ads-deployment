@@ -99,14 +99,19 @@ The deployment of the U-ADS ACB depends on some preexisting resources, which wer
 * _MCP user account_: This account grants access to https://login.mcp.nasa.gov/.
 * _MCP GitLab account_: This account grants access to https://gitlab.mcp.nasa.gov/.
 * _MCP registration token for GitLab executors_: Section _GitLab_ of this README file explaines how to obtain the registration token for MCP GitLab.
+* _Trigger token for [Unity-MCP-Clone](https://gitlab.mcp.nasa.gov/unity/unity-mcp-clone)_: This is the trigger token for https://gitlab.mcp.nasa.gov/unity/unity-mcp-clone git project, which can be accessed after logging into MCP GitLab.
 
 ### Deployment Steps
 
 Follow these steps to deploy U-ADS ACB:
 1. Download the software for automated U-ADS ACB deployment by entering the command
-   * git clone https://github.com/unity-sds/unity-ads-deployment
-2. 
-### Deploying U-ADS ACB
+   * _git clone https://github.com/unity-sds/unity-ads-deployment_
+2. The second step is to create a file named _mcp_glu_secrets.json_ that contains three secret values, which are MCP GitLab account user ID, MCP GitLab account access token, and trigger token for [Unity-MCP-Clone](https://gitlab.mcp.nasa.gov/unity/unity-mcp-clone) pipeline. The json file must reside in _unity-ads-deployment/ci_cd/policies_ subdirectory. In the same subdirectory, there already exists a template file, which can be used to create the desired json file. To create the file, do the following
+   * _cd unity-ads-deployment/ci_cd/policies_
+   * _cp mcp_glu_secrets.json.incomplete mcp_glu_secrets.json_
+   * Open the file _mcp_glu_secrets.json_ populate it with the missing values, i.e. replace each occurance of <*> in the file with an appropriate value.
+3. Use your MCP user account credentials to log into https://login.mcp.nasa.gov/ and obtain short term access tokens, then set the tokens as shell environment variables in a terminal from where you want to deploy U-ADS ACB.
+4. Deploying U-ADS ACB
 
 ### Unity API Gateway Deployment and Stage
 
