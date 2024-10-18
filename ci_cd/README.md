@@ -90,17 +90,25 @@ The registration token can be reset at this same location.
 
 ## U-ADS ACB Deployment in Brief
 
+This section explaines how to deploy U-ADS ACB into Unity _Dev_ account (venue) in MCP cloud. The deployment into Unity _Test_ and _Prod_ accounts are also done the same way. Just replace any occurence of _Dev_ with either _Test_ or _Prod_.
+
+### Requirements
+
 The deployment of the U-ADS ACB depends on some preexisting resources, which were overed in Section _Dependencies_. However, there are other requirements which need to be met before a successful deployment. Please, keep in mind that the requirements covered in this README file are only for U-ADS ACB deploument and not for cloning and building a project (using U-ADS ACB). Document _MCP Cloning_ covers the requirements for a successful use of U-ADS ACB. The remaining requirements for a successful deployment are
 
 * _MCP user account_: This account grants access to https://login.mcp.nasa.gov/.
 * _MCP GitLab account_: This account grants access to https://gitlab.mcp.nasa.gov/.
-* _MCP registration token for GitLab executors_:
+* _MCP registration token for GitLab executors_: Section _GitLab_ of this README file explaines how to obtain the registration token for MCP GitLab.
 
-### Requirements
+### Deployment Steps
 
-### Downloading Deployment Software
-
+Follow these steps to deploy U-ADS ACB:
+1. Download the software for automated U-ADS ACB deployment by entering the command
+   * git clone https://github.com/unity-sds/unity-ads-deployment
+2. 
 ### Deploying U-ADS ACB
+
+### Unity API Gateway Deployment and Stage
 
 ### What to Expect
 
