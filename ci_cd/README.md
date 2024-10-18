@@ -132,7 +132,7 @@ After entering _terraform aaply_ command and a coffee break, because time is nee
 #### GitLab Runner
 
 The registered runner will appear at the Unity group CI/CD.  To see the registered runner
-1. Log in to MCP GitLab at https://gitlab.mcp.nasa.gov/
+1. Log into MCP GitLab at https://gitlab.mcp.nasa.gov/
 2. From the left sidebar select _Groups_
 3. Then select _Unity_ group
 4. Again, from the left sidebar select _Build > Runners_
@@ -155,4 +155,29 @@ After a successful U-ADS ACB deployment, you should be able to log into _unity-a
 
 At the home directory of _gitlab-runner_ account, you should find the git project _unity-app-build-trigger_ installed.
 
+## U-ADS ACB Destruction
 
+This section explaines how to destroy U-ADS ACB system already deployed into Unity _Dev_ account (venue) in MCP cloud. The destruction of the system in Unity _Test_ and _Prod_ accounts are also done the same way. Just replace any occurence of _Dev_ with either _Test_ or _Prod_.
+
+Follow these steps to destroy U-ADS ACB (commands in _italic_):
+1. Use your MCP user account credentials to log into https://login.mcp.nasa.gov/ and obtain short term access tokens for Unity Dev account, then set the tokens as shell environment variables in a terminal from where you want to destroy U-ADS ACB system.
+2. Now, you should be able to destroy U-ADS ACB in MCP cloud Unity _Dev_ account from the same terminal where you set the MCP cloud short term access tokens. Enter the following command:
+   * _cd unity-ads-deployment/ci_cd/Dev_
+   * _terrafrom destroy_
+
+The first prompt, after entering the command _terrafrom destroy_, can be ignored, and you just press the _return_ key. The second prompt expects the confirmation of the U-ADS ACB system distruction, and you enter _yes_.
+
+### Important Notes
+
+#### GitLab Runner
+
+Ideally, the command _terrafrom destroy_ should unregister the GitLab runner registered at MCP GitLab during _terraform apply_; however, the Terraform automation cannot unregister the runner. At the time of the development of this deployment automation software, MCP did not permit EC2 Instance access via _ssh_ for security reasons. The only method for automatic unregistraion of the runner, that the original developer of this automation system was able to find,  required _ssh_ access to the EC2 instance. A future developer should look into this and see whether or not there are ways to implement the automated runner unregistration.
+
+It is not necessary to worry about the elimination of the useless runners, that are left behind after _terraform destroy_ commands; however, the person who maintains this system should log into MCP GitLab at https://gitlab.mcp.nasa.gov/ occasionally, access Unity group runners, and delete the suspended or inactive runners.
+
+#### _MCP-GLU-CLONE_ Secret
+
+By default, AWS does not immediately destroy an _AWS Secrets Manager_ secret upon a destruction request, and the secret gets scheduled for destruction after a grace period, which is usually several days. The U-ADS ACB system deployment Terraform script sets the destruction grace period for _MCP-GLU-Clone_ secret to zero (0); therefore, it should be deleted immediately during _terraform destroy_. However, if the secret is not destroyed immediately during _terraform destroy_, then the following AWS CLI command will destroy is immediately:
+   * _aws secretsmanager delete-secret --secret-id MCP-GLU-Clone --force-delete-without-recovery --region us-west-2_
+
+It is important to make sure the secret is deleted before the next _terraform apply_; otherwise, the next deployment attempt will fail.
