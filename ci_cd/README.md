@@ -106,12 +106,17 @@ The deployment of the U-ADS ACB depends on some preexisting resources, which wer
 Follow these steps to deploy U-ADS ACB:
 1. Download the software for automated U-ADS ACB deployment by entering the command
    * _git clone https://github.com/unity-sds/unity-ads-deployment_
-2. The second step is to create a file named _mcp_glu_secrets.json_ that contains three secret values, which are MCP GitLab account user ID, MCP GitLab account access token, and trigger token for [Unity-MCP-Clone](https://gitlab.mcp.nasa.gov/unity/unity-mcp-clone) pipeline. The json file must reside in _unity-ads-deployment/ci_cd/policies_ subdirectory. In the same subdirectory, there already exists a template file, which can be used to create the desired json file. To create the file, do the following
+2. Create a file named _mcp_glu_secrets.json_ that contains three secret values, which are MCP GitLab account user ID, MCP GitLab account access token, and trigger token for [Unity-MCP-Clone](https://gitlab.mcp.nasa.gov/unity/unity-mcp-clone) pipeline. The json file must reside in _unity-ads-deployment/ci_cd/policies_ subdirectory. In the same subdirectory, there already exists a template file, which can be used to create the desired json file. To create the file, do the following
    * _cd unity-ads-deployment/ci_cd/policies_
    * _cp mcp_glu_secrets.json.incomplete mcp_glu_secrets.json_
    * Open the file _mcp_glu_secrets.json_ populate it with the missing values, i.e. replace each occurance of <*> in the file with an appropriate value.
-3. Use your MCP user account credentials to log into https://login.mcp.nasa.gov/ and obtain short term access tokens, then set the tokens as shell environment variables in a terminal from where you want to deploy U-ADS ACB.
-4. Deploying U-ADS ACB
+3. Use your MCP user account credentials to log into https://login.mcp.nasa.gov/ and obtain short term access tokens for Unity Dev account, then set the tokens as shell environment variables in a terminal from where you want to deploy U-ADS ACB.
+4. Now, you should be able to deploy U-ADS ACB into MCP cloud from the same terminal where you set the MCP cloud short term access tokens. Enter the following command:
+   * _cd unity-ads-deployment/ci_cd/Dev_
+   * _terrafrom init_
+   * _terraform apply_
+
+After entering the commnad _terraform apply_, first your are prompted to enter the gitlab runner registration token, then you are prompted to confirm the deployment by entring _yes_.
 
 ### Unity API Gateway Deployment and Stage
 
