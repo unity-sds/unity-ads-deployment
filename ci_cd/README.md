@@ -90,7 +90,11 @@ The registration token can be reset at this same location.
 
 ## U-ADS ACB Deployment in Brief
 
-The deployment of the U-ADS ACB is explained here briefly.
+The deployment of the U-ADS ACB depends on some preexisting resources, which were overed in Section _Dependencies_. However, there are other requirements which need to be met before a successful deployment. Please, keep in mind that the requirements covered in this README file are only for U-ADS ACB deploument and not for cloning and building a project (using U-ADS ACB). Document _MCP Cloning_ covers the requirements for a successful use of U-ADS ACB. The remaining requirements for a successful deployment are
+
+* _MCP user account_: This account grants access to https://login.mcp.nasa.gov/.
+* _MCP GitLab account_: This account grants access to https://gitlab.mcp.nasa.gov/.
+* _MCP registration token for GitLab executors_:
 
 ### Requirements
 
