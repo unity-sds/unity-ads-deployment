@@ -141,3 +141,18 @@ You should be able to see a recently registerd runner with three tags _shell, un
 
 #### AWS Resources
 
+Log into https://login.mcp.nasa.gov/ and access Unity _Dev_ account AWS console. The following is a list of some AWS resources that you should be able to find after a successful U-ADS ACB deployment:
+   * AWS Secrets Manager > Secrets > __MCP-GLU-Clone__
+   * VPC > Security Groups > __GitLab Runner Security Group__
+   * EC2 > Instances > __unity-ads-gl-runner-shell__
+   * IAM > Roles > __Lambda-Exec--Unity-ADS--MCP-Clone__
+   * Lambda > Functions > __Unity-ADS--MCP-Clone__
+
+#### Logging into the EC2 Instance
+
+After a successful U-ADS ACB deployment, you should be able to log into _unity-ads-gl-runner-shell_ EC2 insance. Log into https://login.mcp.nasa.gov/ and access Unity _Dev_ account AWS console. Navigate to _EC2 > Instances_, then select _unity-ads-gl-runner-shell_ and click on _Connect_ button close to the top of the page. Then select _Session Manager_ and another _Connect_ button at the lower right corner of the new page. A "terminal" appears with a shell prompt, and you are logged into the EC2 instance. At this point, you should be able to enter the following command and switch to _gitlab-runner_ account:
+   * _sudo su - gitlab-runner_
+
+At the home directory of _gitlab-runner_ account, you should the git project _unity-app-build-trigger_ installed.
+
+
