@@ -64,7 +64,7 @@ where
 ### Instance
 
 This software does not deploy any gitlab instance.  Currently, Unity project uses MCP (Mission Cloud Platform) GitLab provided by Goddard for its git repository management. The MCP GitLab URL is https://gitlab.mcp.nasa.gov.  To request an MCP GitLab lisence, follow the instructions at
-	https://caas.gsfc.nasa.gov/display/GSD1/Requesting+Access+to+GitLab+Ultimate
+[Requesting Access to GitLab Ultimate](https://caas.gsfc.nasa.gov/display/GSD1/Requesting+Access+to+GitLab+Ultimate)
 and choose “Project Owner” for the “Gitlab Role”.
 
 ### Runners
@@ -88,13 +88,13 @@ for entering the current registration token.  To see the token at MCP GitLab
 
 The registration token can be reset at this same location.
 
-## U-ADS ACB Deployment in Brief
+## U-ADS ACB Deployment
 
 This section explaines how to deploy U-ADS ACB into Unity _Dev_ account (venue) in MCP cloud. The deployment into Unity _Test_ and _Prod_ accounts are also done the same way. Just replace any occurence of _Dev_ with either _Test_ or _Prod_.
 
 ### Requirements
 
-The deployment of the U-ADS ACB depends on some preexisting resources, which were overed in Section _Dependencies_. However, there are other requirements which need to be met before a successful deployment. Please, keep in mind that the requirements covered in this README file are only for U-ADS ACB deploument and not for cloning and building a project (using U-ADS ACB). Document _MCP Cloning_ covers the requirements for a successful use of U-ADS ACB. The remaining requirements for a successful deployment are
+The deployment of the U-ADS ACB depends on some preexisting resources, which were covered in Section _Dependencies_. However, there are other requirements which need to be met before a successful deployment. Please, keep in mind that the requirements covered in this README file are only for U-ADS ACB deploument and not for cloning and building a project (using U-ADS ACB). Document _MCP Cloning_ covers the requirements for a successful use of U-ADS ACB. The remaining requirements for a successful deployment are
 
 * _MCP user account_: This account grants access to https://login.mcp.nasa.gov/.
 * _MCP GitLab account_: This account grants access to https://gitlab.mcp.nasa.gov/.
@@ -124,30 +124,20 @@ Intentionally, a portion of U-ADS ACB deployment is not automated and msut be do
 
 ### What to Expect
 
+After entering _terraform aaply_ command and a coffee break, because time is needed for a full U-ADS ACB system initialization, there are a few things that you can check to make sure the ACB system is deployed correctly:
+   * GitLab runner
+   * some AWS resources
+   * loging into the EC2 instance
 
+#### GitLab Runner
 
-For each entry in the list given in  _gl_executor_ids.tf_  file, the software
-1. creates an EC2 instance
-2. runs the file  *install_group_runner_x86_64_\<list entry\>.tftpl*  to prepare the EC2 instance environment:
-   * downloads and installs gitlab runner binary
-   * registers a gitlab executor
-   * downloads and installs all needed tools and libraries needed for the executor to execute pipeline jobs assigned to it 
+The registered executors will appear at the Unity group CI/CD.  To see the registered executor
+1. Log in to MCP GitLab at https://gitlab.mcp.nasa.gov/
+2. From the left sidebar select _Groups_
+3. Then select _Unity_ group
+4. Again, from the left sidebar select _Build > Runners_
 
-The registered executors will appear at the Unity group CI/CD.  To see a list of registered executors,
-1. Log in to MCP GitLab
-2. starting from top menu bar, go to
-   * Main menu  >  Groups  >  Your groups  >  Unity
-3. starting from left side-bar, go to
-   * CI/CD  >  Runners
+You should be able to see a recently registerd runner with three tags _shell, unity, dev_
 
-Each gitlab executor may have a set of one or more tags.  GitLab will assign a pipeline job with tags only to an executor with the same tags for execution.  Executor tags (if any) can be seen at the location mentioned above, where you can see a list of registered executors.
+#### AWS Resources
 
-Currently the software, without any modification, will only register one gitlab shell executor with _unity_ and _shell_ tags.  However, the software is developed enough to register a docker executor as well by simplly adding _"docker"_ to the list in _gl_executor_ids.tf_ file.
-
-A *.tftpl* filename, like the one mentioned above, is internally generated based on a templatized filename of the form
-
-* install_group_runner_\<architecture\>_\<list entry\>.tftpl
-
-The second parameter *\<list entry\>* was already discussed above.  The first parameter *\<architecture\>* is replaced with the selected architecture for the EC2 instance.  The architecture argument to the terraform command can be provided through *gl_runner_architecture* terraform variable, which has a default value of *"x86_64"*.
-
-The only variable of this terraform script that does not have a default value is *gl_runner_registration_token*.  Therefore, an argument for *gl_runner_registration_token* must be entered at the terraform command line or when prompted.
