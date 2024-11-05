@@ -4,6 +4,7 @@ resource "helm_release" "jupyter_helm" {
   chart      = "jupyterhub"
   namespace  = "jhub-${var.venue_prefix}${var.venue}"
   version    = "3.1.0"
+  timeout    = 3600
 
   cleanup_on_fail  = true
   create_namespace = true
@@ -28,6 +29,7 @@ resource "helm_release" "jupyter_helm" {
   depends_on = [
     module.frontend,
     module.eks,
+    null_resource.update_k8s,
   ]
 }
 
