@@ -105,10 +105,10 @@ module "eks" {
 
 }
 
-resource "null_resource" "update_k8s" {
+resource "null_resource" "eks_post_deployment_actions" {
   depends_on = [module.eks]
   provisioner "local-exec" {
-    command = "./update_k8s.sh ${data.aws_region.current.name} ${module.eks.cluster_name}"
+    command = "./eks_post_deployment_actions.sh ${data.aws_region.current.name} ${module.eks.cluster_name}"
   }
 }
 
