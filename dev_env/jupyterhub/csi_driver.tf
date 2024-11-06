@@ -20,7 +20,7 @@ module "ebs_csi_irsa_role" {
   role_permissions_boundary_arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:policy/mcp-tenantOperator-AMI-APIG"
 
   tags = {
-    "eks_addon" = "efs-csi"
+    "eks_addon" = "ebs-csi"
     "terraform" = "true"
   }
 }
