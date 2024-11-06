@@ -29,7 +29,7 @@ resource "helm_release" "jupyter_helm" {
   depends_on = [
     module.frontend,
     module.eks,
-    null_resource.update_k8s,
+    null_resource.eks_post_deployment_actions,
   ]
 }
 
