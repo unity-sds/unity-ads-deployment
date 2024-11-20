@@ -26,3 +26,13 @@ variable "efs_identifier" {
   type        = string
   # Example value:uads-development-efs-fs"
 }
+
+variable "installprefix" {
+  description = "Installation prefix"
+  type        = string
+  default     = ""
+}
+
+variable "tags" {
+  type = map(string)
+}
