@@ -14,7 +14,7 @@ resource "aws_kms_alias" "efs_key_alias" {
 }
 
 resource "aws_efs_file_system" "dev_support_efs" {
-   creation_token   = "efs"
+   creation_token   = "${var.resource_prefix}-${var.venue_prefix}${var.venue}-efs-token"
    performance_mode = "generalPurpose"
    encrypted        = true
    kms_key_id       = aws_kms_key.efs_key.arn

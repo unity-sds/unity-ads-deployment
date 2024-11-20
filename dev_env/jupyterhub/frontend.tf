@@ -55,7 +55,7 @@ module "frontend" {
 # Initialize connection to HTTP proxy
 resource "aws_ssm_parameter" "serviceproxy_config" {
   depends_on = [module.frontend]
-  name       = "/unity/${var.project}/${var.venue}/cs/management/proxy/configurations/042-jupyterlab"
+  name       = "/unity/${var.project}/${var.venue}/cs/management/proxy/configurations/042-${local.url_terminus_path}"
   type       = "String"
   value       = <<-EOT
     <Location /${var.project}/${var.venue}/${local.url_terminus_path}/>
