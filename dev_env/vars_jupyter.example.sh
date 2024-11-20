@@ -5,7 +5,7 @@ export KUBE_CONFIG_PATH=$HOME/.kube/config
 # Required to be set before beginning installation
 export TF_VAR_project="unity"
 export TF_VAR_venue="dev"
-export TF_VAR_venue_prefix="venue-"
+export TF_VAR_deployment_name="venue"
 
 export TF_VAR_efs_identifier="uads-venue-dev-efs-fs"
 

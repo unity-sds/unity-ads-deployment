@@ -1,11 +1,11 @@
 resource "aws_security_group" "jupyter_lb_sg" {
-  name        = "${var.resource_prefix}-${var.venue_prefix}${var.venue}-lb-sg"
-  description = "U-ADS ${var.venue_prefix}${var.venue} JupyterHub application load balancer security group"
+  name        = "${var.resource_prefix}-${var.deployment_name}-${var.venue}-lb-sg"
+  description = "U-ADS ${var.deployment_name}-${var.venue} JupyterHub application load balancer security group"
 
   vpc_id = data.aws_ssm_parameter.vpc_id.value
 
   tags = {
-    Name = "${var.resource_prefix}-${var.venue_prefix}${var.venue}-lb-sg"
+    Name = "${var.resource_prefix}-${var.deployment_name}-${var.venue}-lb-sg"
   }
 
   # Allow all outbound traffic.
