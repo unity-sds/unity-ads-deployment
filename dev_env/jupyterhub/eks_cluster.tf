@@ -8,37 +8,37 @@ data "aws_ssm_parameter" "ami_id" {
   name = "/mcp/amis/aml2-eks-1-30"
 }
 
-data "external" "current_ip" {
-  program = ["./get_ip.sh"]
-}
-
-resource "aws_security_group" "mc_instance_k8s_api_access" {
-  name        = "${var.resource_prefix}-${var.venue_prefix}${var.venue}-mc-sg"
-  description = "Security group to allow access to K8s API from MC instance"
-
-  vpc_id = data.aws_ssm_parameter.vpc_id.value
-
-  tags = {
-    Name = "${var.resource_prefix}-${var.venue_prefix}${var.venue}-mc-sg"
-  }
-
-  # Allow all outbound traffic.
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  # Allow from variable defined input port
-  ingress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["${data.external.current_ip.result.ip}/32"]
-  }
-
-}
+#data "external" "current_ip" {
+#  program = ["./get_ip.sh"]
+#}
+#
+#resource "aws_security_group" "mc_instance_k8s_api_access" {
+#  name        = "${var.resource_prefix}-${var.venue_prefix}${var.venue}-mc-sg"
+#  description = "Security group to allow access to K8s API from MC instance"
+#
+#  vpc_id = data.aws_ssm_parameter.vpc_id.value
+#
+#  tags = {
+#    Name = "${var.resource_prefix}-${var.venue_prefix}${var.venue}-mc-sg"
+#  }
+#
+#  # Allow all outbound traffic.
+#  egress {
+#    from_port   = 0
+#    to_port     = 0
+#    protocol    = "-1"
+#    cidr_blocks = ["0.0.0.0/0"]
+#  }
+#
+#  # Allow from variable defined input port
+#  ingress {
+#    from_port   = 0
+#    to_port     = 0
+#    protocol    = "-1"
+#    cidr_blocks = ["${data.external.current_ip.result.ip}/32"]
+#  }
+#
+#}
 
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
@@ -74,7 +74,7 @@ module "eks" {
   enable_cluster_creator_admin_permissions = true
 
   # add MC instance access to K8s API
-  cluster_additional_security_group_ids = [aws_security_group.mc_instance_k8s_api_access.id]
+  #cluster_additional_security_group_ids = [aws_security_group.mc_instance_k8s_api_access.id]
 
   eks_managed_node_group_defaults = {
     create_iam_role = true
