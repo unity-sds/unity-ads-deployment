@@ -19,10 +19,10 @@ singleuser:
     name: jupyter/base-notebook
     tag: latest
   profileList:
-    - display_name: "Unity - Datascience Environment (v0.2.3)"
+    - display_name: "Unity - Datascience Environment (v0.2.4)"
       description: "Extends Jupyter datascience environment to include the Dockstore client and AWS client"
       kubespawner_override:
-        image: ghcr.io/unity-sds/unity-docker-stacks/unity_datascience:0.2.3
+        image: ghcr.io/unity-sds/unity-docker-stacks/unity_datascience:0.2.4
       default: true
     - display_name: "Jupyter - Minimal environment"
       description: "To avoid too much bells and whistles: Python."
