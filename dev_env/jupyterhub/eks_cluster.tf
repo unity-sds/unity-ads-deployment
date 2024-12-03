@@ -42,7 +42,8 @@ resource "aws_security_group" "mc_instance_k8s_api_access" {
 
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
-  version = "~> 20.0"
+  # pin to 20.16.0 because unity-proxy is pinned to hashicorp/aws 5.47.0
+  version = "20.16.0"
 
   cluster_name    = "${var.resource_prefix}-${var.deployment_name}-${var.venue}-jupyter"
   cluster_version = "1.30"
