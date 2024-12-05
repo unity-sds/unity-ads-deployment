@@ -9,7 +9,7 @@ data "aws_ssm_parameter" "ami_id" {
 }
 
 data "external" "current_ip" {
-  program = ["./get_ip.sh"]
+  program = ["${path.module}/get_ip.sh"]
 }
 
 resource "aws_security_group" "mc_instance_k8s_api_access" {
