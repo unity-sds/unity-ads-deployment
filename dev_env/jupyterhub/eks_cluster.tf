@@ -101,6 +101,19 @@ module "eks" {
       min_size       = var.eks_node_min_size
       max_size       = var.eks_node_max_size
       desired_size   = var.eks_node_desired_size
+      block_device_mappings = {
+        xvda = {
+          device_name = "/dev/xvda"
+          ebs = {
+            volume_size           = 75
+            volume_type           = "gp3"
+            iops                  = 3000
+            throughput            = 150
+            encrypted             = true
+            delete_on_termination = true
+          }
+        }
+      }
     }
   }
 
