@@ -29,7 +29,13 @@ resource "helm_release" "jupyter_helm" {
   depends_on = [
     module.frontend,
     module.eks,
-    null_resource.eks_post_deployment_actions,
+    kubernetes_storage_class.efs_storage_class,
+    kubernetes_storage_class.ebs_storage_class,
+    aws_eks_addon.efs-csi,
+    aws_eks_addon.ebs-csi,
+    module.efs_csi_irsa_role,
+    module.ebs_csi_irsa_role,
+    null_resource.eks_post_deployment_actions
   ]
 }
 
