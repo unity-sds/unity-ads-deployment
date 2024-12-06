@@ -36,7 +36,6 @@ resource "helm_release" "jupyter_helm" {
     module.efs_csi_irsa_role,
     module.ebs_csi_irsa_role,
     kubernetes_persistent_volume.dev_support_shared_volume,
-    kubernetes_persistent_volume_claim.dev_support_shared_volume_claim,
     null_resource.eks_post_deployment_actions
   ]
 }
