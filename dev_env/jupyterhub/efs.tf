@@ -78,7 +78,8 @@ resource "kubernetes_persistent_volume" "dev_support_shared_volume" {
     kubernetes_storage_class.efs_storage_class,
     aws_efs_mount_target.dev_support_efs_mt_1,
     aws_efs_mount_target.dev_support_efs_mt_2,
-    aws_eks_addon.efs-csi
+    aws_eks_addon.efs-csi,
+    module.efs_csi_irsa_role
   ]
 }
 
@@ -105,6 +106,7 @@ resource "kubernetes_persistent_volume_claim" "dev_support_shared_volume_claim" 
   # Prevents a cycle with eks_cluster.jupyter_hub
   depends_on = [ 
     kubernetes_persistent_volume.dev_support_shared_volume,
-    aws_eks_addon.efs-csi
+    aws_eks_addon.efs-csi,
+    module.efs_csi_irsa_role
   ]
 }
