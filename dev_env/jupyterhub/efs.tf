@@ -42,6 +42,10 @@ resource "kubernetes_storage_class" "efs_storage_class" {
 
   parameters = {
   }
+
+  depends_on = [
+    aws_eks_addon.efs-csi
+  ]
 }
 
 # Documentation on how to set up volume_handle:
