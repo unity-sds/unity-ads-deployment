@@ -23,6 +23,11 @@ module "ebs_csi_irsa_role" {
     "eks_addon" = "ebs-csi"
     "terraform" = "true"
   }
+
+  depends_on = [
+    module.eks,
+    null_resource.eks_post_deployment_actions
+  ]
 }
 
 resource "aws_eks_addon" "ebs-csi" {
@@ -36,7 +41,11 @@ resource "aws_eks_addon" "ebs-csi" {
     "terraform" = "true"
   }
 
-  depends_on = [ module.eks ]
+  depends_on = [
+    module.eks,
+    module.ebs_csi_irsa_role,
+    null_resource.eks_post_deployment_actions
+  ]
 }
 
 ################
@@ -65,6 +74,11 @@ module "efs_csi_irsa_role" {
     "eks_addon" = "efs-csi"
     "terraform" = "true"
   }
+
+  depends_on = [
+    module.eks,
+    null_resource.eks_post_deployment_actions
+  ]
 }
 
 resource "aws_eks_addon" "efs-csi" {
@@ -76,5 +90,9 @@ resource "aws_eks_addon" "efs-csi" {
     "terraform" = "true"
   }
 
-  depends_on = [ module.eks ]
+  depends_on = [
+    module.eks,
+    module.efs_csi_irsa_role,
+    null_resource.eks_post_deployment_actions
+  ]
 }

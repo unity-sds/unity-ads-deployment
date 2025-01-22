@@ -12,7 +12,7 @@ variable "venue" {
   type        = string
 }
 
-variable "venue_prefix" {
+variable "deployment_name" {
   description = "Optional string to place before the venue name in resource names"
   type        = string
 }

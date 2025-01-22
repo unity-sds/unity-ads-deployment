@@ -2,7 +2,7 @@ resource "helm_release" "jupyter_helm" {
   name       = "jupyterhub"
   repository = "https://jupyterhub.github.io/helm-chart"
   chart      = "jupyterhub"
-  namespace  = "jhub-${var.venue_prefix}${var.venue}"
+  namespace  = "jhub-${var.deployment_name}-${var.venue}"
   version    = "3.1.0"
   timeout    = 3600
 
@@ -29,7 +29,14 @@ resource "helm_release" "jupyter_helm" {
   depends_on = [
     module.frontend,
     module.eks,
-    null_resource.eks_post_deployment_actions,
+    kubernetes_storage_class.efs_storage_class,
+    kubernetes_storage_class.ebs_storage_class,
+    aws_eks_addon.efs-csi,
+    aws_eks_addon.ebs-csi,
+    module.efs_csi_irsa_role,
+    module.ebs_csi_irsa_role,
+    kubernetes_persistent_volume.dev_support_shared_volume,
+    null_resource.eks_post_deployment_actions
   ]
 }
 

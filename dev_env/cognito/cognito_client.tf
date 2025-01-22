@@ -3,7 +3,7 @@ data "aws_cognito_user_pools" "unity_user_pool" {
 }
 
 resource "aws_cognito_user_pool_client" "jupyter_cognito_client" {
-  name          = "${var.resource_prefix}-jupyter-${var.venue_prefix}${var.venue}-client"
+  name          = "${var.resource_prefix}-jupyter-${var.deployment_name}-${var.venue}-client"
   user_pool_id  = tolist(data.aws_cognito_user_pools.unity_user_pool.ids)[0]
 
   callback_urls = var.jupyter_base_url != null ? ["${var.jupyter_base_url}/${var.jupyter_base_path}/hub/oauth_callback"] : null

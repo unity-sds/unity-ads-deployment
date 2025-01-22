@@ -1,5 +1,5 @@
 resource "aws_security_group" "dev_support_efs_jupyter_sg" {
-   name = "${var.resource_prefix}-${var.venue_prefix}${var.venue}-efs-jupyter-sg"
+   name = "${var.resource_prefix}-${var.deployment_name}-${var.venue}-efs-jupyter-sg"
    description= "Allows inbound EFS traffic from Jupyter cluster"
    vpc_id = data.aws_ssm_parameter.vpc_id.value
 
@@ -38,10 +38,14 @@ resource "kubernetes_storage_class" "efs_storage_class" {
     name = "efs"
   }
   storage_provisioner = "efs.csi.aws.com"
-  reclaim_policy      = "Delete"
+  reclaim_policy      = "Retain"
 
   parameters = {
   }
+
+  depends_on = [
+    aws_eks_addon.efs-csi
+  ]
 }
 
 # Documentation on how to set up volume_handle:
@@ -50,7 +54,7 @@ resource "kubernetes_storage_class" "efs_storage_class" {
 # https://kubernetes.io/docs/concepts/storage/persistent-volumes/
 resource "kubernetes_persistent_volume" "dev_support_shared_volume" {
   metadata {
-    name = "${var.resource_prefix}-${var.venue_prefix}${var.venue}-dev-data"
+    name = "${var.resource_prefix}-${var.deployment_name}-${var.venue}-dev-data"
   }
 
   spec {
@@ -61,7 +65,7 @@ resource "kubernetes_persistent_volume" "dev_support_shared_volume" {
       storage = "100Gi"
     }
 
-    persistent_volume_reclaim_policy = "Delete"
+    persistent_volume_reclaim_policy = "Retain"
 
     persistent_volume_source {
       csi {
@@ -70,7 +74,7 @@ resource "kubernetes_persistent_volume" "dev_support_shared_volume" {
       }
     }
 
-    mount_options = [ "iam" ]
+    mount_options = [ "tls", "iam" ]
   }
 
   # Prevents a cycle with eks_cluster.jupyter_hub
@@ -78,13 +82,14 @@ resource "kubernetes_persistent_volume" "dev_support_shared_volume" {
     kubernetes_storage_class.efs_storage_class,
     aws_efs_mount_target.dev_support_efs_mt_1,
     aws_efs_mount_target.dev_support_efs_mt_2,
-    aws_eks_addon.efs-csi
+    aws_eks_addon.efs-csi,
+    module.efs_csi_irsa_role
   ]
 }
 
 resource "kubernetes_persistent_volume_claim" "dev_support_shared_volume_claim" {
   metadata {
-    name = "${var.resource_prefix}-${var.venue_prefix}${var.venue}-dev-data"
+    name = "${var.resource_prefix}-${var.deployment_name}-${var.venue}-dev-data"
     namespace = helm_release.jupyter_helm.namespace
   }
 
@@ -105,6 +110,7 @@ resource "kubernetes_persistent_volume_claim" "dev_support_shared_volume_claim" 
   # Prevents a cycle with eks_cluster.jupyter_hub
   depends_on = [ 
     kubernetes_persistent_volume.dev_support_shared_volume,
-    aws_eks_addon.efs-csi
+    aws_eks_addon.efs-csi,
+    module.efs_csi_irsa_role
   ]
 }

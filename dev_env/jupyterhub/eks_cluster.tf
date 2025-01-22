@@ -8,43 +8,44 @@ data "aws_ssm_parameter" "ami_id" {
   name = "/mcp/amis/aml2-eks-1-30"
 }
 
-#data "external" "current_ip" {
-#  program = ["./get_ip.sh"]
-#}
-#
-#resource "aws_security_group" "mc_instance_k8s_api_access" {
-#  name        = "${var.resource_prefix}-${var.venue_prefix}${var.venue}-mc-sg"
-#  description = "Security group to allow access to K8s API from MC instance"
-#
-#  vpc_id = data.aws_ssm_parameter.vpc_id.value
-#
-#  tags = {
-#    Name = "${var.resource_prefix}-${var.venue_prefix}${var.venue}-mc-sg"
-#  }
-#
-#  # Allow all outbound traffic.
-#  egress {
-#    from_port   = 0
-#    to_port     = 0
-#    protocol    = "-1"
-#    cidr_blocks = ["0.0.0.0/0"]
-#  }
-#
-#  # Allow from variable defined input port
-#  ingress {
-#    from_port   = 0
-#    to_port     = 0
-#    protocol    = "-1"
-#    cidr_blocks = ["${data.external.current_ip.result.ip}/32"]
-#  }
-#
-#}
+data "external" "current_ip" {
+  program = ["${path.module}/get_ip.sh"]
+}
+
+resource "aws_security_group" "mc_instance_k8s_api_access" {
+  name        = "${var.resource_prefix}-${var.deployment_name}-${var.venue}-mc-sg"
+  description = "Security group to allow access to K8s API from MC instance"
+
+  vpc_id = data.aws_ssm_parameter.vpc_id.value
+
+  tags = {
+    Name = "${var.resource_prefix}-${var.deployment_name}-${var.venue}-mc-sg"
+  }
+
+  # Allow all outbound traffic.
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  # Allow from variable defined input port
+  ingress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["${data.external.current_ip.result.ip}/32"]
+  }
+
+}
 
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
-  version = "~> 20.0"
+  # pin to 20.16.0 because unity-proxy is pinned to hashicorp/aws 5.47.0
+  version = "20.16.0"
 
-  cluster_name    = "${var.resource_prefix}-${var.venue_prefix}${var.venue}-jupyter"
+  cluster_name    = "${var.resource_prefix}-${var.deployment_name}-${var.venue}-jupyter"
   cluster_version = "1.30"
 
   cluster_addons = {
@@ -66,7 +67,7 @@ module "eks" {
   enable_irsa = true
 
   create_iam_role = true
-  iam_role_name = "Unity-ADS-${var.venue_prefix}${var.venue}-EKSClusterRole"
+  iam_role_name = "Unity-ADS-${var.deployment_name}-${var.venue}-EKSClusterRole"
   iam_role_permissions_boundary = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:policy/mcp-tenantOperator-AMI-APIG"
 
   cluster_endpoint_public_access = true
@@ -74,11 +75,11 @@ module "eks" {
   enable_cluster_creator_admin_permissions = true
 
   # add MC instance access to K8s API
-  #cluster_additional_security_group_ids = [aws_security_group.mc_instance_k8s_api_access.id]
+  cluster_additional_security_group_ids = [aws_security_group.mc_instance_k8s_api_access.id]
 
   eks_managed_node_group_defaults = {
     create_iam_role = true
-    iam_role_name = "Unity-ADS-${var.venue_prefix}${var.venue}-EKSNodeRole"
+    iam_role_name = "Unity-ADS-${var.deployment_name}-${var.venue}-EKSNodeRole"
     iam_role_permissions_boundary = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:policy/mcp-tenantOperator-AMI-APIG"
 
     ami_id          = data.aws_ssm_parameter.ami_id.value
@@ -100,6 +101,19 @@ module "eks" {
       min_size       = var.eks_node_min_size
       max_size       = var.eks_node_max_size
       desired_size   = var.eks_node_desired_size
+      block_device_mappings = {
+        xvda = {
+          device_name = "/dev/xvda"
+          ebs = {
+            volume_size           = 75
+            volume_type           = "gp3"
+            iops                  = 3000
+            throughput            = 150
+            encrypted             = true
+            delete_on_termination = true
+          }
+        }
+      }
     }
   }
 
@@ -108,7 +122,7 @@ module "eks" {
 resource "null_resource" "eks_post_deployment_actions" {
   depends_on = [module.eks]
   provisioner "local-exec" {
-    command = "./eks_post_deployment_actions.sh ${data.aws_region.current.name} ${module.eks.cluster_name}"
+    command = "${path.module}/eks_post_deployment_actions.sh ${data.aws_region.current.name} ${module.eks.cluster_name}"
   }
 }
 
