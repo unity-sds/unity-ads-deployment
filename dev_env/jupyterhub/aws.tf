@@ -9,3 +9,9 @@ locals {
     Stack = "${var.component_cost_name}"
   }
 }
+
+provider "aws" {
+  default_tags {
+    tags = local.cost_tags
+  }
+}
