@@ -24,6 +24,10 @@ singleuser:
       kubespawner_override:
         image: ghcr.io/unity-sds/unity-docker-stacks/unity_datascience:0.2.4
       default: true
+    - display_name: "VTLS Development (v0.2.5)"
+      description: "Development environment for the VTLS team"
+      kubespawner_override:
+        image: ghcr.io/unity-sds/unity-docker-stacks/vtls_dev:0.2.5
     - display_name: "Jupyter - Minimal environment"
       description: "To avoid too much bells and whistles: Python."
       kubespawner_override:
