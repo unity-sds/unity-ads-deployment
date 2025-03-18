@@ -1,5 +1,5 @@
 resource "aws_security_group" "dev_support_efs_jupyter_sg" {
-   name = "${var.resource_prefix}-${var.deployment_name}-${var.venue}-efs-jupyter-sg"
+   name = "${var.resource_prefix}-${local.deployment_name}${var.venue}-efs-jupyter-sg"
    description= "Allows inbound EFS traffic from Jupyter cluster"
    vpc_id = data.aws_ssm_parameter.vpc_id.value
 
@@ -54,7 +54,7 @@ resource "kubernetes_storage_class" "efs_storage_class" {
 # https://kubernetes.io/docs/concepts/storage/persistent-volumes/
 resource "kubernetes_persistent_volume" "dev_support_shared_volume" {
   metadata {
-    name = "${var.resource_prefix}-${var.deployment_name}-${var.venue}-dev-data"
+    name = "${var.resource_prefix}-${local.deployment_name}${var.venue}-dev-data"
   }
 
   spec {
@@ -89,7 +89,7 @@ resource "kubernetes_persistent_volume" "dev_support_shared_volume" {
 
 resource "kubernetes_persistent_volume_claim" "dev_support_shared_volume_claim" {
   metadata {
-    name = "${var.resource_prefix}-${var.deployment_name}-${var.venue}-dev-data"
+    name = "${var.resource_prefix}-${local.deployment_name}${var.venue}-dev-data"
     namespace = helm_release.jupyter_helm.namespace
   }
 

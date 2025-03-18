@@ -13,13 +13,13 @@ data "external" "current_ip" {
 }
 
 resource "aws_security_group" "mc_instance_k8s_api_access" {
-  name        = "${var.resource_prefix}-${var.deployment_name}-${var.venue}-mc-sg"
+  name        = "${var.resource_prefix}-${local.deployment_name}${var.venue}-mc-sg"
   description = "Security group to allow access to K8s API from MC instance"
 
   vpc_id = data.aws_ssm_parameter.vpc_id.value
 
   tags = {
-    Name = "${var.resource_prefix}-${var.deployment_name}-${var.venue}-mc-sg"
+    Name = "${var.resource_prefix}-${local.deployment_name}${var.venue}-mc-sg"
   }
 
   # Allow all outbound traffic.
@@ -45,7 +45,7 @@ module "eks" {
   # pin to 20.16.0 because unity-proxy is pinned to hashicorp/aws 5.47.0
   version = "20.16.0"
 
-  cluster_name    = "${var.resource_prefix}-${var.deployment_name}-${var.venue}-jupyter"
+  cluster_name    = "${var.resource_prefix}-${local.deployment_name}${var.venue}-jupyter"
   cluster_version = "1.30"
 
   cluster_addons = {
@@ -67,7 +67,7 @@ module "eks" {
   enable_irsa = true
 
   create_iam_role = true
-  iam_role_name = "Unity-ADS-${var.deployment_name}-${var.venue}-EKSClusterRole"
+  iam_role_name = "Unity-ADS-${local.deployment_name}${var.venue}-EKSClusterRole"
   iam_role_permissions_boundary = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:policy/mcp-tenantOperator-AMI-APIG"
 
   cluster_endpoint_public_access = true
@@ -79,7 +79,7 @@ module "eks" {
 
   eks_managed_node_group_defaults = {
     create_iam_role = true
-    iam_role_name = "Unity-ADS-${var.deployment_name}-${var.venue}-EKSNodeRole"
+    iam_role_name = "Unity-ADS-${local.deployment_name}${var.venue}-EKSNodeRole"
     iam_role_permissions_boundary = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:policy/mcp-tenantOperator-AMI-APIG"
 
     ami_id          = data.aws_ssm_parameter.ami_id.value

@@ -36,3 +36,9 @@ variable "installprefix" {
 variable "tags" {
   type = map(string)
 }
+
+locals {
+  # Use this instead of deployment name
+  # It prevents including an extra hypen when deployment_name is not defined
+  deployment_name = var.deployment_name != "" ? "${var.deployment_name}-" : ""
+}
