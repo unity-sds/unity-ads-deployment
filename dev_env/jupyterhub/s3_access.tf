@@ -36,7 +36,7 @@ locals {
 }
 
 resource "aws_iam_policy" "s3_access_policy" {
-  name = "Unity-ADS-${var.deployment_name}-${var.venue}-JupyterS3Policy"
+  name = "Unity-ADS-${local.deployment_name}${var.venue}-JupyterS3Policy"
 
   # If no s3 buckets are defined in the variable supply a dummy policy
   policy = length(var.jupyter_s3_buckets) > 0 ?  local.s3_buckets_policy : local.empty_policy
@@ -45,7 +45,7 @@ resource "aws_iam_policy" "s3_access_policy" {
 module "s3_irsa_role" {
   source = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
 
-  role_name             = "Unity-ADS-${var.deployment_name}-${var.venue}-S3ServiceAccount"
+  role_name             = "Unity-ADS-${local.deployment_name}${var.venue}-S3ServiceAccount"
 
   role_policy_arns = {
     policy = aws_iam_policy.s3_access_policy.arn

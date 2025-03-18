@@ -36,7 +36,7 @@ module "frontend" {
 
   project = var.project
   venue = var.venue
-  deployment_name = var.deployment_name
+  deployment_name = local.deployment_name
   resource_prefix = var.resource_prefix
   load_balancer_port = local.load_balancer_port
   jupyter_proxy_port = var.jupyter_proxy_port

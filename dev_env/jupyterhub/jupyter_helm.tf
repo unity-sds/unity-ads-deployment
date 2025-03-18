@@ -2,7 +2,7 @@ resource "helm_release" "jupyter_helm" {
   name       = "jupyterhub"
   repository = "https://jupyterhub.github.io/helm-chart"
   chart      = "jupyterhub"
-  namespace  = "jhub-${var.deployment_name}-${var.venue}"
+  namespace  = "jhub-${local.deployment_name}${var.venue}"
   version    = "3.1.0"
   timeout    = 3600
 
